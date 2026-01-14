@@ -12,3 +12,5 @@ After this is done, the script can be run.
 To continue to the next step of the script whenever one is finished, press the SPACE bar. To reverse the numbering of the slices, press x. 
 
 The data from the slices is also exported as a csv. 
+
+The code is available under the GPL2 license and no guarantee is provided for the code. 

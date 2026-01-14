@@ -153,11 +153,8 @@ def export_measurements_to_csv(segments, original_obj=None, filepath=None, addit
                         bpy.ops.export_mesh.stl(
                             filepath=full_export_path,
                             use_selection=True,
-                            use_mesh_modifiers=True # Often desired for final geometry
+                            use_mesh_modifiers=True 
                         )
-                    # Add other formats like FBX if desired
-                    # elif segment_export_format.upper() == 'FBX':
-                    #    bpy.ops.export_scene.fbx(filepath=full_export_path, use_selection=True, ...)
                     else:
                         print(f"Unsupported segment export format: {segment_export_format}")
                     print(f"Exported segment: {seg_obj.name} to {full_export_path}")
@@ -281,7 +278,6 @@ def segment_by_cutting(bone_obj, segments=10):
             plane_no_start = (0, 1, 0)
             plane_co_end   = (0, end, 0)
             plane_no_end   = (0, 1, 0)
-        # (Extend similarly if you want to consider z)
         
         # Cutting: Only cut if not the first or last segment
         if i > 0:
@@ -323,15 +319,6 @@ def segment_by_cutting(bone_obj, segments=10):
         elif axis == 'y':
             print(f"Segment {i} length on y-axis: {segment_obj.dimensions.y}")
             
-            
-        '''measurements.append(
-        types.SimpleNamespace(
-            name=seg.name,
-            length=measure_length(seg),
-            width=measure_width(seg),
-            volume=measure_volume(seg),
-            )
-        )'''
     return segmented_objects
 
 def align_to_xy_plane_alt(obj):
@@ -492,7 +479,7 @@ class ConfirmAlignmentAndSliceOperator(bpy.types.Operator):
             return {'CANCELLED'}
         
         self.reverse = False # Existing initialization
-        self.current_number_of_slices = 10  # *** ADD THIS LINE *** (Set your desired default)
+        self.current_number_of_slices = 10  # Default value; can be set externally before invoking
 
         args = (self, context)
         ConfirmAlignmentAndSliceOperator._handler = bpy.types.SpaceView3D.draw_handler_add(
@@ -545,7 +532,6 @@ class ConfirmAlignmentAndSliceOperator(bpy.types.Operator):
             for obj in bpy.data.objects: obj.select_set(False) # Deselect all other objects
             self._bone_obj.select_set(True)
 
-            # ---- CRUCIAL: APPLY MANUALLY ADJUSTED TRANSFORMATIONS ----
             print(f"Applying final (manually adjusted) transforms to '{self._bone_obj.name}' before slicing...")
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
             print("Transforms applied.")
@@ -554,17 +540,12 @@ class ConfirmAlignmentAndSliceOperator(bpy.types.Operator):
             print(f"Slicing object: {self._bone_obj.name} with {self.current_number_of_slices} slices.")
             start_time = time.perf_counter()
 
-            # ---- USE THE ORIGINAL segment_by_cutting FUNCTION ----
-            # This function (from your CodeBlender2.py) should determine the slicing axis (X or Y)
-            # based on the object's current dimensions after transforms are applied.
-            # Ensure this function is defined in your script globally.
             segments = segment_by_cutting(self._bone_obj, segments=self.current_number_of_slices)
             # ----------------------------------------------------
 
             end_time = time.perf_counter()
             elapsed_time = end_time - start_time
 
-            # ... (the rest of the method for processing segments, volume calculation, etc., remains the same)
             if not segments:
                 print("Slicing did not produce any segments.")
                 if self._bone_obj and self._bone_obj.name in bpy.data.objects:
@@ -573,7 +554,6 @@ class ConfirmAlignmentAndSliceOperator(bpy.types.Operator):
 
             print(f"\n--- Slicing Complete ---")
             print(f"Created {len(segments)} segmented pieces in {elapsed_time:.4f} seconds.")
-            # ... (rest of the loop and summary)
             total_segment_volume_final = 0
             print("\n--- Post-processing Segments ---")
             
@@ -618,8 +598,6 @@ class ConfirmAlignmentAndSliceOperator(bpy.types.Operator):
 
             if self._bone_obj and self._bone_obj.name in bpy.data.objects:
                 self._bone_obj.hide_set(True)
-            # Add this to the execute_slicing_and_postprocessing method in ConfirmAlignmentAndSliceOperator class
-            # (This would go at the end of the method, right after calculating all the volumes)
 
                 # Store segment data for CSV export
                 segment_measurements = []
@@ -656,10 +634,6 @@ class ConfirmAlignmentAndSliceOperator(bpy.types.Operator):
                     original_obj=self._bone_obj,
                     additional_data=additional_data, 
                     filepath = f"/Users/johannes/Desktop/blend_folder_{self._bone_obj.name}/measurements.csv" #EDIT FILEPATH FOR WRITING HERE
-                    # Optional: override defaults if needed
-                    # export_segment_meshes=True,
-                    # segment_export_subfolder="my_3D_segments",
-                    # segment_export_format='STL'
                 )
                 
                 if csv_filepath:
@@ -671,7 +645,6 @@ class ConfirmAlignmentAndSliceOperator(bpy.types.Operator):
                     self._bone_obj.hide_set(True)
             
 
-   # ... (inside ConfirmAlignmentAndSliceOperator class) ...
     def draw_callback_px(self, op_instance, context): # op_instance is 'self'
         if not op_instance._bone_obj or op_instance._bone_obj.name not in bpy.data.objects:
             return

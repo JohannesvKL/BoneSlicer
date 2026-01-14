@@ -1,4 +1,7 @@
 # BoneSlicer
+
+[![DOI](https://zenodo.org/badge/1083818814.svg)](https://doi.org/10.5281/zenodo.18249866)
+
 Repository for code related to the bone segmentation project in collaboration with Uni Stuttgart 
 
 Python script that can be used with Blender on Mac, Linux and Microsoft. 
